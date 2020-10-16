@@ -7,6 +7,7 @@ class ArticlesController < ApplicationController
     @articles = @articles.tagged_with(params[:tag]) if params[:tag].present?
     @articles = @articles.authored_by(params[:author]) if params[:author].present?
     @articles = @articles.favorited_by(params[:favorited]) if params[:favorited].present?
+    @articles = @articles.where("text like '%#{params[:search]}%'")
 
     @articles_count = @articles.count
 
@@ -28,7 +29,7 @@ class ArticlesController < ApplicationController
   end
 
   def create
-    @article = Article.new(article_params)
+    @article = Article.new(params[:article])
     @article.user = current_user
 
     if @article.save
@@ -46,7 +47,7 @@ class ArticlesController < ApplicationController
     @article = Article.find_by_slug!(params[:slug])
 
     if @article.user_id == @current_user_id
-      @article.update_attributes(article_params)
+      @article.update_attributes(params[:article])
 
       render :show
     else
