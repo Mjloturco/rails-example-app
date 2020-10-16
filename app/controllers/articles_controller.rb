@@ -44,7 +44,7 @@ class ArticlesController < ApplicationController
     @article = Article.find_by!(slug: params[:slug])
 
     if @article.user_id == @current_user_id
-      @article.update_attributes(article_params)
+      @article.update_attributes(params[:article])
 
       render :show
     else
