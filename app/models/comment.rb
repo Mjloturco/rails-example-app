@@ -1,6 +1,4 @@
-# frozen_string_literal: true
-
-class Comment < ApplicationRecord
+class Comment < ActiveRecord::Base
   belongs_to :user
   belongs_to :article
 

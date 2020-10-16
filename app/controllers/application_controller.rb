@@ -1,8 +1,11 @@
-# frozen_string_literal: true
+class ApplicationController < ActionController::Base
+  # Prevent CSRF attacks by raising an exception.
+  # For APIs, you may want to use :null_session instead.
+  protect_from_forgery with: :null_session
 
-class ApplicationController < ActionController::API
-  include ActionController::HttpAuthentication::Token::ControllerMethods
+  respond_to :json
 
+  before_action :underscore_params!
   before_action :configure_permitted_parameters, if: :devise_controller?
   before_action :authenticate_user
 
@@ -13,20 +16,20 @@ class ApplicationController < ActionController::API
   end
 
   def authenticate_user
-    return if request.headers['Authorization'].blank?
+    if request.headers['Authorization'].present?
+      authenticate_or_request_with_http_token do |token|
+        begin
+          jwt_payload = JWT.decode(token, Rails.application.secrets.secret_key_base).first
 
-    authenticate_or_request_with_http_token do |token|
-      begin
-        jwt_payload = JWT.decode(token, Rails.application.secrets.secret_key_base).first
-
-        @current_user_id = jwt_payload['id']
-      rescue JWT::ExpiredSignature, JWT::VerificationError, JWT::DecodeError
-        head :unauthorized
+          @current_user_id = jwt_payload['id']
+        rescue JWT::ExpiredSignature, JWT::VerificationError, JWT::DecodeError
+          head :unauthorized
+        end
       end
     end
   end
 
-  def authenticate_user!(_options = {})
+  def authenticate_user!(options = {})
     head :unauthorized unless signed_in?
   end
 
@@ -36,5 +39,9 @@ class ApplicationController < ActionController::API
 
   def signed_in?
     @current_user_id.present?
+  end
+
+  def underscore_params!
+    params.deep_transform_keys!(&:underscore)
   end
 end
