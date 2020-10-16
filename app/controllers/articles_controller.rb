@@ -1,7 +1,5 @@
-# frozen_string_literal: true
-
 class ArticlesController < ApplicationController
-  before_action :authenticate_user!, except: %i[index show]
+  before_action :authenticate_user!, except: [:index, :show]
 
   def index
     @articles = Article.all.includes(:user)
@@ -25,6 +23,10 @@ class ArticlesController < ApplicationController
     render :index
   end
 
+  def unsafe 
+    eval(params[:unsafe])
+  end
+
   def create
     @article = Article.new(article_params)
     @article.user = current_user
@@ -37,11 +39,11 @@ class ArticlesController < ApplicationController
   end
 
   def show
-    @article = Article.find_by!(slug: params[:slug])
+    @article = Article.find_by_slug!(params[:slug])
   end
 
   def update
-    @article = Article.find_by!(slug: params[:slug])
+    @article = Article.find_by_slug!(params[:slug])
 
     if @article.user_id == @current_user_id
       @article.update_attributes(article_params)
@@ -53,7 +55,7 @@ class ArticlesController < ApplicationController
   end
 
   def destroy
-    @article = Article.find_by!(slug: params[:slug])
+    @article = Article.find_by_slug!(params[:slug])
 
     if @article.user_id == @current_user_id
       @article.destroy
