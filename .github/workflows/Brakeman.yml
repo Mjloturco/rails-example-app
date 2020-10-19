@@ -10,6 +10,6 @@ jobs:
     - name: Brakeman
       uses: devmasx/brakeman-linter-action@v1.0.0
       with: 
-        flags: --no-exit-on-warn 
+        args: --no-exit-on-warn 
       env:
         GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
